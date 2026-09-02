@@ -1,11 +1,277 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Dokploy CD Demo</title>
+    <style>
+        :root {
+            --bg: #0a0e14;
+            --bg-glow-1: #1a2f6b;
+            --bg-glow-2: #0d3b3f;
+            --card-bg: #10161f;
+            --border: #1f2937;
+            --text: #e5e7eb;
+            --muted: #6b7280;
+            --accent: #6366f1;
+            --accent-2: #22d3ee;
+            --ok: #34d399;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Fondo con resplandor difuso, estilo dashboards oscuros */
+        body::before,
+        body::after {
+            content: "";
+            position: absolute;
+            width: 60vw;
+            height: 60vw;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.35;
+            z-index: 0;
+        }
+
+        body::before {
+            background: var(--bg-glow-1);
+            top: -20%;
+            left: -15%;
+        }
+
+        body::after {
+            background: var(--bg-glow-2);
+            bottom: -25%;
+            right: -15%;
+        }
+
+        /* Grid sutil de fondo */
+        .grid-overlay {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            z-index: 0;
+        }
+
+        header.topbar {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: fixed;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .logo-mark {
+            width: 34px;
+            height: 34px;
+            flex-shrink: 0;
+        }
+
+        .brand-name {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+
+        .brand-name span {
+            background: linear-gradient(90deg, var(--accent-2), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        main {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 32px;
+            max-width: 900px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.35);
+            color: var(--ok);
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 36px;
+        }
+
+        .status-pill .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--ok);
+            box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55); }
+            70% { box-shadow: 0 0 0 10px rgba(52, 211, 153, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+        }
+
+        /* ==========================================================
+           👇 ESTE ES EL TEXTO QUE CAMBIAS EN CADA DEPLOY PARA VER
+           LA MAGIA DEL CD DE DOKPLOY EN ACCIÓN 👇
+           ========================================================== */
+        #demo-text {
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -0.03em;
+            margin: 0 0 20px 0;
+            background: linear-gradient(135deg, #ffffff 30%, var(--accent-2) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 16px;
+            max-width: 520px;
+            line-height: 1.6;
+            margin: 0 0 40px 0;
+        }
+
+        .subtitle code {
+            color: var(--accent-2);
+            background: rgba(34, 211, 238, 0.08);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .meta-card {
+            display: flex;
+            gap: 24px;
+            padding: 16px 24px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .meta-card div {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: left;
+        }
+
+        .meta-card span.label {
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 0.06em;
+            color: #4b5563;
+        }
+
+        .meta-card span.value {
+            color: var(--text);
+            font-weight: 600;
+            font-family: "SFMono-Regular", Consolas, monospace;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 24px;
+            z-index: 1;
+            color: #374151;
+            font-size: 12px;
+        }
+
+        footer a {
+            color: #4b5563;
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello STP</h1>
+    <div class="grid-overlay"></div>
+
+    <header class="topbar">
+        <svg class="logo-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="dokployGradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#22d3ee"/>
+                    <stop offset="100%" stop-color="#6366f1"/>
+                </linearGradient>
+            </defs>
+            <rect width="32" height="32" rx="8" fill="url(#dokployGradient)"/>
+            <path d="M9 9H15.5C19.6421 9 23 12.3579 23 16.5V16.5C23 20.6421 19.6421 24 15.5 24H9V9Z" fill="#0a0e14"/>
+            <rect x="9" y="9" width="4.5" height="15" fill="#0a0e14"/>
+        </svg>
+        <div class="brand-name">Dok<span>ploy</span></div>
+    </header>
+
+    <main>
+        <div class="status-pill">
+            <span class="dot"></span>
+            Desplegado con Dokploy
+        </div>
+
+        <h1 id="demo-text">Hola STP 🚀</h1>
+
+        <p class="subtitle">
+            Este texto es la prueba de <strong>Continuous Deployment</strong>: edita
+            <code>#demo-text</code> en <code>index.html</code>, haz push, y observa cómo
+            Dokploy reconstruye y despliega el cambio automáticamente.
+        </p>
+
+        <div class="meta-card">
+            <div>
+                <span class="label">Build</span>
+                <span class="value">#local</span>
+            </div>
+            <div>
+                <span class="label">Rama</span>
+                <span class="value">main</span>
+            </div>
+            <div>
+                <span class="label">Estado</span>
+                <span class="value" style="color: var(--ok);">Live</span>
+            </div>
+        </div>
+    </main>
+
+    <footer>lab_pruebas &middot; potenciado por Dokploy</footer>
 </body>
 </html>
